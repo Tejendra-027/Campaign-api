@@ -1,0 +1,26 @@
+{
+  "name": "express-mysql-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tejendra",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "install": "^0.13.0",
+    "jsonwebtoken": "^9.0.2",
+    "module": "^1.2.5",
+    "mysql2": "^3.14.1",
+    "npm": "^11.4.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
