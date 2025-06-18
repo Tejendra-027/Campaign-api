@@ -10,6 +10,7 @@ exports.listUsers = (req, res) => {
 
 exports.addUser = async (req, res) => {
     const { name, email, mobileCountryCode, mobile, password, roleId } = req.body;
+    if (!password) return res.status(400).json({ message: 'Password is required' });
     const hashedPassword = await bcrypt.hash(password, 10);
     const sql = 'INSERT INTO user (name, email, mobileCountryCode, mobile, password, roleId) VALUES (?, ?, ?, ?, ?, ?)';
     db.query(sql, [name, email, mobileCountryCode, mobile, hashedPassword, roleId], (err, result) => {
@@ -20,12 +21,23 @@ exports.addUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     const { name, email, mobileCountryCode, mobile, password, roleId } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const sql = 'UPDATE user SET name=?, email=?, mobileCountryCode=?, mobile=?, password=?, roleId=? WHERE id=?';
-    db.query(sql, [name, email, mobileCountryCode, mobile, hashedPassword, roleId, req.params.id], (err, result) => {
-        if (err) return res.status(500).json({ err });
-        res.json({ message: 'User updated successfully' });
-    });
+    const userId = req.params.id;
+
+    // If password is provided, hash and update it; otherwise, don't update password
+    if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const sql = 'UPDATE user SET name=?, email=?, mobileCountryCode=?, mobile=?, password=?, roleId=? WHERE id=?';
+        db.query(sql, [name, email, mobileCountryCode, mobile, hashedPassword, roleId, userId], (err, result) => {
+            if (err) return res.status(500).json({ err });
+            res.json({ message: 'User updated successfully' });
+        });
+    } else {
+        const sql = 'UPDATE user SET name=?, email=?, mobileCountryCode=?, mobile=?, roleId=? WHERE id=?';
+        db.query(sql, [name, email, mobileCountryCode, mobile, roleId, userId], (err, result) => {
+            if (err) return res.status(500).json({ err });
+            res.json({ message: 'User updated successfully' });
+        });
+    }
 };
 
 exports.getUserDetail = (req, res) => {
