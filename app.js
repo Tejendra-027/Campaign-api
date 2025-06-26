@@ -7,6 +7,8 @@ app.use(express.json());
 // Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
+const listRoutes = require('./routes/list');
+const listItemRoutes = require('./routes/listItem');
 
 // Root route for browser check
 app.get('/', (req, res) => {
@@ -16,6 +18,8 @@ app.get('/', (req, res) => {
 // Use routes
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
+app.use('/list', listRoutes);
+app.use('/list/item', listItemRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;
