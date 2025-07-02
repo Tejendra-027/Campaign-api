@@ -2,18 +2,32 @@ const db = require('../models/db');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-exports.login = async ({ email, password }) => {
+exports.login = async ({ email, mobile, password }) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT * FROM user WHERE email = ?', [email], async (err, results) => {
+        if ((!email && !mobile) || !password) {
+            return reject({ status: 400, message: 'Email or mobile and password are required' });
+        }
+
+        let query = '';
+        let param = '';
+        if (email) {
+            query = 'SELECT * FROM user WHERE email = ? LIMIT 1';
+            param = email;
+        } else {
+            query = 'SELECT * FROM user WHERE mobile = ? LIMIT 1';
+            param = mobile;
+        }
+
+        db.query(query, [param], async (err, results) => {
             if (err) return reject({ status: 500, message: 'Database error', error: err });
-            if (results.length === 0) return reject({ status: 401, message: 'Invalid email or password' });
+            if (results.length === 0) return reject({ status: 401, message: 'Invalid credentials' });
 
             const user = results[0];
             const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) return reject({ status: 401, message: 'Invalid email or password' });
+            if (!isMatch) return reject({ status: 401, message: 'Invalid credentials' });
 
             const token = jwt.sign(
-                { id: user.id, email: user.email },
+                { id: user.id, email: user.email, mobile: user.mobile },
                 process.env.JWT_SECRET,
                 { expiresIn: '1h' }
             );
@@ -45,4 +59,18 @@ exports.register = async ({ name, email, mobileCountryCode, mobile, password, ro
             });
         });
     });
-}
+};
+
+// Delete user by ID
+exports.deleteUser = async (userId) => {
+    return new Promise((resolve, reject) => {
+        if (!userId) {
+            return reject({ status: 400, message: 'User ID is required' });
+        }
+        db.query('DELETE FROM user WHERE id = ?', [userId], (err, result) => {
+            if (err) return reject({ status: 500, message: 'Database error', error: err });
+            if (result.affectedRows === 0) return reject({ status: 404, message: 'User not found' });
+            resolve({ message: 'User deleted successfully' });
+        });
+    });
+};

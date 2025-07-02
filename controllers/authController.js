@@ -17,3 +17,13 @@ exports.register = async (req, res) => {
         res.status(err.status || 500).json({ message: err.message, error: err.error });
     }
 };
+
+// Delete user controller
+exports.deleteUser = async (req, res) => {
+    try {
+        const result = await authService.deleteUser(req.params.id);
+        res.json(result);
+    } catch (err) {
+        res.status(err.status || 500).json({ message: err.message, error: err.error });
+    }
+};

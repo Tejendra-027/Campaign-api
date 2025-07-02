@@ -21,10 +21,10 @@ exports.addListItem = async (req, res) => {
 
 exports.uploadCsv = async (req, res) => {
     try {
-        await listItemService.uploadCsv(req.file); // You'll need to handle file upload middleware
-        res.json({ message: 'CSV uploaded and processed' });
+        const result = await listItemService.uploadCsv(req.file);
+        res.json({ success: true, ...result });
     } catch (err) {
-        res.status(500).json({ error: err.message || err });
+        res.status(400).json({ error: err.message });
     }
 };
 

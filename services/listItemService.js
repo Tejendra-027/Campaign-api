@@ -1,4 +1,6 @@
 const db = require('../models/db');
+const fs = require('fs');
+const csv = require('csv-parser');
 
 // List all list items with pagination/filter
 exports.filterListItems = ({ page = 1, limit = 10, search = '', listId }) => {
@@ -86,8 +88,41 @@ exports.getListItemDetail = (id) => {
     });
 };
 
-// Upload CSV (stub)
+// Upload CSV and insert list items in bulk
 exports.uploadCsv = (file) => {
-    // TODO: Implement CSV upload logic
-    return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        if (!file) return reject(new Error('No file uploaded'));
+
+        const results = [];
+        fs.createReadStream(file.path)
+            .pipe(csv())
+            .on('data', (row) => {
+                // Expecting columns: listId, email, name, variables (as JSON string or blank)
+                results.push({
+                    listId: row.listId,
+                    email: row.email,
+                    name: row.name,
+                    variables: row.variables ? JSON.parse(row.variables) : null
+                });
+            })
+            .on('end', () => {
+                // Bulk insert
+                if (results.length === 0) return resolve({ inserted: 0 });
+                const values = results.map(item => [
+                    item.listId,
+                    item.email,
+                    item.name,
+                    JSON.stringify(item.variables)
+                ]);
+                db.query(
+                    'INSERT INTO list_item (listId, email, name, variables) VALUES ?',
+                    [values],
+                    (err, result) => {
+                        if (err) return reject(err);
+                        resolve({ inserted: result.affectedRows });
+                    }
+                );
+            })
+            .on('error', (err) => reject(err));
+    });
 };
