@@ -58,3 +58,13 @@ exports.getListDetail = (id) => {
         });
     });
 };
+
+// ✅ Delete a list by ID
+exports.deleteList = (id) => {
+    return new Promise((resolve, reject) => {
+        db.query('DELETE FROM list WHERE id = ?', [id], (err, result) => {
+            if (err) return reject(err);
+            resolve(result.affectedRows > 0);
+        });
+    });
+};
