@@ -106,7 +106,6 @@ exports.uploadCsv = (file) => {
                 });
             })
             .on('end', () => {
-                // Bulk insert
                 if (results.length === 0) return resolve({ inserted: 0 });
                 const values = results.map(item => [
                     item.listId,
@@ -124,5 +123,15 @@ exports.uploadCsv = (file) => {
                 );
             })
             .on('error', (err) => reject(err));
+    });
+};
+
+// ✅ Delete a list item by ID
+exports.deleteListItem = (id) => {
+    return new Promise((resolve, reject) => {
+        db.query('DELETE FROM list_item WHERE id = ?', [id], (err, result) => {
+            if (err) return reject(err);
+            resolve(result.affectedRows > 0); // true if deleted
+        });
     });
 };

@@ -48,3 +48,17 @@ exports.getListItemDetail = async (req, res) => {
         res.status(500).json({ error: err.message || err });
     }
 };
+
+// ✅ DELETE a list item by ID
+exports.deleteListItem = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const deleted = await listItemService.deleteListItem(id);
+        if (!deleted) {
+            return res.status(404).json({ message: 'List item not found or already deleted' });
+        }
+        res.json({ message: 'List item deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message || err });
+    }
+};

@@ -1,9 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -13,20 +13,21 @@ const userRoutes = require('./routes/user');
 const listRoutes = require('./routes/list');
 const listItemRoutes = require('./routes/listItem');
 
-// Root route
+// Health check route
 app.get('/', (req, res) => {
   res.send('API is running!');
 });
 
-// Use routes
+// Register routes
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 
-// Support both paths for list routes
+// Support both dashboard and base paths for list routes
 app.use('/dashboard/lists', listRoutes);
-app.use('/list', listRoutes);
+app.use('/list', listRoutes); // Enables /list endpoints
 
-app.use('/list/item', listItemRoutes);
+// List item routes
+app.use('/list/item', listItemRoutes); //  Handles /list/item/:id, etc.
 
 // Start server
 const PORT = process.env.PORT || 3000;
