@@ -1,5 +1,6 @@
 const userService = require('../services/userService');
 
+// List all users
 exports.listUsers = async (req, res) => {
     try {
         const users = await userService.listUsers();
@@ -9,6 +10,7 @@ exports.listUsers = async (req, res) => {
     }
 };
 
+// Add a new user
 exports.addUser = async (req, res) => {
     try {
         const id = await userService.addUser(req.body);
@@ -18,6 +20,7 @@ exports.addUser = async (req, res) => {
     }
 };
 
+// Update user info
 exports.updateUser = async (req, res) => {
     const userId = req.params.id;
     try {
@@ -31,6 +34,7 @@ exports.updateUser = async (req, res) => {
     }
 };
 
+// Get single user detail
 exports.getUserDetail = async (req, res) => {
     try {
         const user = await userService.getUserDetail(req.params.id);
@@ -44,7 +48,6 @@ exports.getUserDetail = async (req, res) => {
 // Delete user by ID (admin only)
 exports.deleteUser = async (req, res) => {
     try {
-        // Only allow admin (roleId === 1)
         if (!req.user || req.user.roleId !== 1) {
             return res.status(403).json({ message: 'Only admin can delete users' });
         }
@@ -54,6 +57,28 @@ exports.deleteUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         res.json({ message: 'User deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ err: err.message || err });
+    }
+};
+
+// ✅ Reset user password by ID (admin only)
+exports.resetPassword = async (req, res) => {
+    try {
+        if (!req.user || req.user.roleId !== 1) {
+            return res.status(403).json({ message: 'Only admin can reset passwords' });
+        }
+
+        const userId = req.params.id;
+        const { newPassword } = req.body;
+
+        if (!newPassword) {
+            return res.status(400).json({ message: 'New password is required' });
+        }
+
+        await userService.resetPassword(userId, newPassword);
+
+        res.json({ message: 'Password reset successfully' });
     } catch (err) {
         res.status(500).json({ err: err.message || err });
     }

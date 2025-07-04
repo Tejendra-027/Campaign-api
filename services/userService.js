@@ -1,6 +1,7 @@
 const db = require('../models/db');
 const bcrypt = require('bcryptjs');
 
+// List all users
 exports.listUsers = () => {
     return new Promise((resolve, reject) => {
         db.query('SELECT * FROM user', (err, results) => {
@@ -10,6 +11,7 @@ exports.listUsers = () => {
     });
 };
 
+// Add a new user
 exports.addUser = async (data) => {
     const { name, email, mobileCountryCode, mobile, password, roleId } = data;
     if (!password) throw new Error('Password is required');
@@ -23,6 +25,7 @@ exports.addUser = async (data) => {
     });
 };
 
+// Update user fields
 exports.updateUser = async (userId, data) => {
     const { name, email, mobileCountryCode, mobile, password, roleId } = data;
     let fields = [];
@@ -69,6 +72,7 @@ exports.updateUser = async (userId, data) => {
     });
 };
 
+// Get single user detail by ID
 exports.getUserDetail = (userId) => {
     return new Promise((resolve, reject) => {
         db.query('SELECT * FROM user WHERE id = ?', [userId], (err, results) => {
@@ -82,6 +86,19 @@ exports.getUserDetail = (userId) => {
 exports.deleteUser = (userId) => {
     return new Promise((resolve, reject) => {
         db.query('DELETE FROM user WHERE id = ?', [userId], (err, result) => {
+            if (err) return reject(err);
+            resolve(result);
+        });
+    });
+};
+
+// 🔐 Reset user password by ID (admin use case)
+exports.resetPassword = async (userId, newPassword) => {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    return new Promise((resolve, reject) => {
+        const sql = 'UPDATE user SET password = ? WHERE id = ?';
+        db.query(sql, [hashedPassword, userId], (err, result) => {
             if (err) return reject(err);
             resolve(result);
         });
