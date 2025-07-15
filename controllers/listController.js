@@ -1,75 +1,84 @@
 const listService = require('../services/listService');
 
-// 🔍 Filter / list all entries with pagination & optional search
+/* ------------------------------------------------------------------ */
+/* 🔍 1. Filter / paginate / search  – POST body                      */
+/* ------------------------------------------------------------------ */
 exports.filterLists = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '' } = req.query;
+    const { page = 1, limit = 10, search = '' } = req.body; // ← body
     const lists = await listService.filterLists({ page, limit, search });
-    res.json(lists);
+    return res.json(lists);
   } catch (err) {
-    console.error('❌ Error filtering lists:', err);
-    res.status(500).json({ error: 'Failed to fetch lists.' });
+    console.error('❌ filterLists:', err);
+    return res.status(500).json({ error: 'Failed to fetch lists.' });
   }
 };
 
-// ➕ Add a new list
+/* ------------------------------------------------------------------ */
+/* ➕ 2. Add list                                                      */
+/* ------------------------------------------------------------------ */
 exports.addList = async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) return res.status(400).json({ error: 'List name is required.' });
 
     const id = await listService.addList({ name });
-    res.status(201).json({ message: 'List added successfully.', id });
+    return res.status(201).json({ message: 'List added successfully.', id });
   } catch (err) {
-    console.error('❌ Error adding list:', err);
-    res.status(500).json({ error: 'Failed to add list.' });
+    console.error('❌ addList:', err);
+    return res.status(500).json({ error: 'Failed to add list.' });
   }
 };
 
-// ✏️ Update existing list by ID
+/* ------------------------------------------------------------------ */
+/* ✏️ 3. Update list (PUT /:id)                                       */
+/* ------------------------------------------------------------------ */
 exports.updateList = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = Number(req.params.id);
     const { name } = req.body;
-
     if (!name) return res.status(400).json({ error: 'List name is required.' });
 
     await listService.updateList(id, { name });
-    res.json({ message: 'List updated successfully.' });
+    return res.json({ message: 'List updated successfully.' });
   } catch (err) {
-    console.error('❌ Error updating list:', err);
-    res.status(500).json({ error: 'Failed to update list.' });
+    console.error('❌ updateList:', err);
+    return res.status(500).json({ error: 'Failed to update list.' });
   }
 };
 
-// 📄 Get list details by ID
+/* ------------------------------------------------------------------ */
+/* 📄 4. Get list detail  – POST /detail  (id in body)                */
+/* ------------------------------------------------------------------ */
 exports.getListDetail = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    const list = await listService.getListDetail(id);
+    const { id } = req.body;            // ← body, not params
+    if (!id) return res.status(400).json({ error: 'List ID is required.' });
 
+    const list = await listService.getListDetail(Number(id));
     if (!list) return res.status(404).json({ error: 'List not found.' });
 
-    res.json(list);
+    return res.json(list);
   } catch (err) {
-    console.error('❌ Error getting list detail:', err);
-    res.status(500).json({ error: 'Failed to fetch list detail.' });
+    console.error('❌ getListDetail:', err);
+    return res.status(500).json({ error: 'Failed to fetch list detail.' });
   }
 };
 
-// 🗑️ Delete a list (and its items) by ID
+/* ------------------------------------------------------------------ */
+/* 🗑️ 5. Delete list (and items)  – DELETE /:id                      */
+/* ------------------------------------------------------------------ */
 exports.deleteList = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = Number(req.params.id);
     const deleted = await listService.deleteList(id);
 
     if (!deleted) {
       return res.status(404).json({ message: 'List not found or already deleted.' });
     }
-
-    res.json({ message: '✅ List and items deleted successfully.' });
+    return res.json({ message: '✅ List and items deleted successfully.' });
   } catch (err) {
-    console.error('❌ Error deleting list:', err);
-    res.status(500).json({ error: 'Failed to delete list.' });
+    console.error('❌ deleteList:', err);
+    return res.status(500).json({ error: 'Failed to delete list.' });
   }
 };

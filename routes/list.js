@@ -1,20 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const listController = require('../controllers/listController');
+const authMiddleware = require('../middleware/authMiddleware'); // 🔐 protect routes
 
-// GET all lists with optional filters (search, pagination)
-router.get('/', listController.filterLists);
+/* ------------------------------------------------------------------
+   LIST ROUTES
+------------------------------------------------------------------- */
 
-// GET single list by ID
-router.get('/:id', listController.getListDetail);
+// 🔍 Filter / paginate / search  (now POST with JSON body)
+router.post('/filter', authMiddleware, listController.filterLists);
 
-// POST a new list
-router.post('/', listController.addList);
+// 📄 Get single list by ID (converted from GET /:id)
+router.post('/detail', authMiddleware, listController.getListDetail);
 
-// PUT (update) a list by ID
-router.put('/:id', listController.updateList);
+// ➕ Add a new list
+router.post('/', authMiddleware, listController.addList);
 
-// DELETE a list by ID
-router.delete('/:id', listController.deleteList); // ✅ DELETE /dashboard/lists/:id
+// ✏️ Update a list
+router.put('/:id', authMiddleware, listController.updateList);
+
+// 🗑️ Delete a list (manual cascade in controller)
+router.delete('/:id', authMiddleware, listController.deleteList);
 
 module.exports = router;

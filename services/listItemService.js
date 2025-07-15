@@ -4,145 +4,133 @@ const fs  = require('fs');
 const csv = require('csv-parser');
 
 /* ------------------------------------------------------------------ */
-/* Filter list‑items                                                  */
+/* 🔍 Filter list‑items  → returns { rows, total }                    */
 /* ------------------------------------------------------------------ */
 exports.filterListItems = ({ page = 1, limit = 10, search = '', listId }) => {
+  page  = Number(page);
+  limit = Number(limit);
   const offset = (page - 1) * limit;
-  let sql      = 'SELECT * FROM list_item WHERE 1=1';
-  const params = [];
+
+  /* --- build WHERE clause once --- */
+  let where   = 'WHERE 1=1';
+  const parms = [];
 
   if (search) {
-    sql += ' AND (email LIKE ? OR name LIKE ?)';
-    params.push(`%${search}%`, `%${search}%`);
+    where += ' AND (email LIKE ? OR name LIKE ?)';
+    parms.push(`%${search}%`, `%${search}%`);
   }
   if (listId) {
-    sql += ' AND listId = ?';
-    params.push(listId);
+    where += ' AND listId = ?';
+    parms.push(listId);
   }
 
-  sql += ' LIMIT ? OFFSET ?';
-  params.push(Number(limit), Number(offset));
+  /* --- main rows query --- */
+  const rowsSql   = `SELECT * FROM list_item ${where} LIMIT ? OFFSET ?`;
+  const rowsParms = [...parms, limit, offset];
+
+  /* --- count query (no LIMIT/OFFSET) --- */
+  const cntSql   = `SELECT COUNT(*) AS total FROM list_item ${where}`;
+  const cntParms = parms;
 
   return new Promise((resolve, reject) => {
-    db.query(sql, params, (err, results) => {
+    db.query(rowsSql, rowsParms, (err, rows) => {
       if (err) return reject(err);
-      resolve(results);
+      db.query(cntSql, cntParms, (cntErr, cntRes) => {
+        if (cntErr) return reject(cntErr);
+        const total = cntRes[0]?.total ?? 0;
+        resolve({ rows, total });
+      });
     });
   });
 };
 
 /* ------------------------------------------------------------------ */
-/* Add single list‑item                                               */
+/* ➕ Add single list‑item                                             */
 /* ------------------------------------------------------------------ */
-exports.addListItem = ({ listId, email, name, variables }) => {
-  return new Promise((resolve, reject) => {
+exports.addListItem = ({ listId, email, name, variables }) =>
+  new Promise((resolve, reject) => {
     db.query(
       'INSERT INTO list_item (listId, email, name, variables) VALUES (?, ?, ?, ?)',
       [listId, email, name, JSON.stringify(variables)],
-      (err, result) => {
-        if (err) return reject(err);
-        resolve(result.insertId);
-      }
+      (err, r) => (err ? reject(err) : resolve(r.insertId))
     );
   });
-};
 
 /* ------------------------------------------------------------------ */
-/* Update list‑item                                                   */
+/* ✏️ Update list‑item                                                */
 /* ------------------------------------------------------------------ */
 exports.updateListItem = (id, { listId, email, name, variables }) => {
   const fields = [];
-  const values = [];
+  const vals   = [];
 
-  if (listId !== undefined) { fields.push('listId=?');   values.push(listId); }
-  if (email  !== undefined)  { fields.push('email=?');   values.push(email); }
-  if (name   !== undefined)  { fields.push('name=?');    values.push(name); }
+  if (listId !== undefined) { fields.push('listId=?'); vals.push(listId); }
+  if (email  !== undefined)  { fields.push('email=?'); vals.push(email); }
+  if (name   !== undefined)  { fields.push('name=?');  vals.push(name);  }
   if (variables !== undefined) {
     fields.push('variables=?');
-    values.push(JSON.stringify(variables));
+    vals.push(JSON.stringify(variables));
   }
+  if (!fields.length) return Promise.reject(new Error('No fields to update'));
 
-  if (fields.length === 0) return Promise.reject(new Error('No fields to update'));
-
-  values.push(id);
+  vals.push(id);
   const sql = `UPDATE list_item SET ${fields.join(', ')} WHERE id=?`;
 
   return new Promise((resolve, reject) => {
-    db.query(sql, values, (err, result) => {
-      if (err) return reject(err);
-      resolve(result);
-    });
+    db.query(sql, vals, (e, r) => (e ? reject(e) : resolve(r)));
   });
 };
 
 /* ------------------------------------------------------------------ */
-/* Get detail                                                         */
+/* 📄 Get detail                                                      */
 /* ------------------------------------------------------------------ */
-exports.getListItemDetail = (id) => {
-  return new Promise((resolve, reject) => {
-    db.query('SELECT * FROM list_item WHERE id = ?', [id], (err, res) => {
-      if (err) return reject(err);
-      resolve(res[0]);
-    });
+exports.getListItemDetail = (id) =>
+  new Promise((resolve, reject) => {
+    db.query('SELECT * FROM list_item WHERE id = ?', [id], (e, r) =>
+      e ? reject(e) : resolve(r[0])
+    );
   });
-};
 
 /* ------------------------------------------------------------------ */
-/* CSV upload  ✨ respects defaultListId                               */
+/* 📤 CSV upload  – respects defaultListId                            */
 /* ------------------------------------------------------------------ */
-exports.uploadCsv = (file, defaultListId = null) => {
-  return new Promise((resolve, reject) => {
+exports.uploadCsv = (file, defaultListId = null) =>
+  new Promise((resolve, reject) => {
     if (!file) return reject(new Error('No file uploaded'));
 
     const rows = [];
-
     fs.createReadStream(file.path)
       .pipe(csv())
       .on('data', (row) => {
-        const name  = row.Name  || row.name;
-        const email = row.Email || row.email;
+        const name   = row.Name  || row.name;
+        const email  = row.Email || row.email;
         const listId = row.listId || row.ListId || defaultListId;
+        if (!name || !email || !listId) return;  // skip invalid
 
-        if (!name || !email || !listId) return; // skip invalid
-
-        const variables = {};
-        for (const key in row) {
-          if (!['name', 'Name', 'email', 'Email', 'listId', 'ListId'].includes(key)) {
-            variables[key] = row[key];
+        const vars = {};
+        for (const k in row) {
+          if (!['name','Name','email','Email','listId','ListId'].includes(k)) {
+            vars[k] = row[k];
           }
         }
-
-        rows.push([
-          listId,
-          email,
-          name,
-          Object.keys(variables).length ? JSON.stringify(variables) : null
-        ]);
+        rows.push([listId, email, name, Object.keys(vars).length ? JSON.stringify(vars) : null]);
       })
       .on('end', () => {
-        if (rows.length === 0) return resolve({ inserted: 0 });
-
+        if (!rows.length) return resolve({ inserted: 0 });
         db.query(
           'INSERT INTO list_item (listId, email, name, variables) VALUES ?',
           [rows],
-          (err, result) => {
-            if (err) return reject(err);
-            resolve({ inserted: result.affectedRows });
-          }
+          (e, r) => (e ? reject(e) : resolve({ inserted: r.affectedRows }))
         );
       })
       .on('error', reject);
   });
-};
 
 /* ------------------------------------------------------------------ */
-/* Delete list‑item                                                   */
+/* 🗑️ Delete list‑item                                               */
 /* ------------------------------------------------------------------ */
-exports.deleteListItem = (id) => {
-  return new Promise((resolve, reject) => {
-    db.query('DELETE FROM list_item WHERE id = ?', [id], (err, res) => {
-      if (err) return reject(err);
-      resolve(res.affectedRows > 0);
-    });
+exports.deleteListItem = (id) =>
+  new Promise((resolve, reject) => {
+    db.query('DELETE FROM list_item WHERE id = ?', [id], (e, r) =>
+      e ? reject(e) : resolve(r.affectedRows > 0)
+    );
   });
-};

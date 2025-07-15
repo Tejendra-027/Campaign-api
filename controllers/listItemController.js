@@ -1,12 +1,11 @@
-// controllers/listItemController.js
 const listItemService = require('../services/listItemService');
 
 /* ------------------------------------------------------------------ */
-/* Filter (paginated / search)                                        */
+/* 🔍 Filter (POST /filter)                                           */
 /* ------------------------------------------------------------------ */
 exports.filterListItems = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '', listId } = req.query;
+    const { page = 1, limit = 10, search = '', listId } = req.body; // ← changed from req.query
     const items = await listItemService.filterListItems({ page, limit, search, listId });
     res.json(items);
   } catch (err) {
@@ -15,7 +14,7 @@ exports.filterListItems = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* Add single item                                                    */
+/* ➕ Add single item                                                 */
 /* ------------------------------------------------------------------ */
 exports.addListItem = async (req, res) => {
   try {
@@ -27,12 +26,12 @@ exports.addListItem = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* CSV upload  <— listId passed along!                                */
+/* 📤 CSV upload                                                      */
 /* ------------------------------------------------------------------ */
 exports.uploadCsv = async (req, res) => {
   try {
-    const defaultListId = req.body.listId ? Number(req.body.listId) : null;   // ✅ NEW
-    const result = await listItemService.uploadCsv(req.file, defaultListId);  // ✅ pass it
+    const defaultListId = req.body.listId ? Number(req.body.listId) : null;
+    const result = await listItemService.uploadCsv(req.file, defaultListId);
     res.json({ success: true, ...result });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -40,7 +39,7 @@ exports.uploadCsv = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* Update single item                                                 */
+/* ✏️ Update single item                                             */
 /* ------------------------------------------------------------------ */
 exports.updateListItem = async (req, res) => {
   try {
@@ -53,11 +52,11 @@ exports.updateListItem = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* Get single item detail                                             */
+/* 📄 Get item detail (POST /detail)                                  */
 /* ------------------------------------------------------------------ */
 exports.getListItemDetail = async (req, res) => {
   try {
-    const id = req.params.id;
+    const { id } = req.body; // ← changed from req.params.id
     const item = await listItemService.getListItemDetail(id);
     if (!item) return res.status(404).json({ message: 'List item not found' });
     res.json(item);
@@ -67,7 +66,7 @@ exports.getListItemDetail = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* Delete single item                                                 */
+/* 🗑️ Delete item                                                    */
 /* ------------------------------------------------------------------ */
 exports.deleteListItem = async (req, res) => {
   try {
