@@ -27,7 +27,7 @@ exports.login = async ({ email, mobile, password }) => {
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) return reject({ status: 401, message: 'Invalid credentials' });
 
-            // ✅ Include roleId in token for admin privileges
+            // Include roleId in token for admin privileges
             const token = jwt.sign(
                 {
                     id: user.id,

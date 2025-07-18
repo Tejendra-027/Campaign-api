@@ -7,19 +7,19 @@ const authMiddleware = require('../middleware/authMiddleware'); // 🔐 protect 
    LIST ROUTES
 ------------------------------------------------------------------- */
 
-// 🔍 Filter / paginate / search  (now POST with JSON body)
+// Filter / paginate / search  (now POST with JSON body)
 router.post('/filter', authMiddleware, listController.filterLists);
 
-// 📄 Get single list by ID (converted from GET /:id)
+// Get single list by ID (converted from GET /:id)
 router.post('/detail', authMiddleware, listController.getListDetail);
 
-// ➕ Add a new list
+// Add a new list
 router.post('/', authMiddleware, listController.addList);
 
-// ✏️ Update a list
+// Update a list
 router.put('/:id', authMiddleware, listController.updateList);
 
-// 🗑️ Delete a list (manual cascade in controller)
+// Delete a list (manual cascade in controller)
 router.delete('/:id', authMiddleware, listController.deleteList);
 
 module.exports = router;

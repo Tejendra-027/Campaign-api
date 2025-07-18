@@ -8,22 +8,22 @@ const upload           = multer({ dest: 'uploads/' });
 
 /* ─────────────── LIST‑ITEM ROUTES ─────────────── */
 
-// 🔍 Filter / paginate / search — POST body instead of GET query
+// Filter / paginate / search — POST body instead of GET query
 router.post('/filter', authMiddleware, listItemController.filterListItems);
 
-// ➕ Create a new item
+// Create a new item
 router.post('/add', authMiddleware, listItemController.addListItem);
 
-// 📤 CSV upload (unchanged)
+// CSV upload (unchanged)
 router.post('/upload', authMiddleware, upload.single('file'), listItemController.uploadCsv);
 
-// ✏️ Update item
+// Update item
 router.put('/:id', authMiddleware, listItemController.updateListItem);
 
-// 📄 Get single item detail  ▸ converted from GET /:id
+// Get single item detail  ▸ converted from GET /:id
 router.post('/detail', authMiddleware, listItemController.getListItemDetail);
 
-// 🗑️ Delete item
+// Delete item
 router.delete('/:id', authMiddleware, listItemController.deleteListItem);
 
 module.exports = router;

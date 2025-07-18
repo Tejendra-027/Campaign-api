@@ -1,7 +1,7 @@
 const listItemService = require('../services/listItemService');
 
 /* ------------------------------------------------------------------ */
-/* 🔍 Filter (POST /filter)                                           */
+/* Filter (POST /filter)                                           */
 /* ------------------------------------------------------------------ */
 exports.filterListItems = async (req, res) => {
   try {
@@ -14,7 +14,7 @@ exports.filterListItems = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* ➕ Add single item                                                 */
+/* Add single item                                                 */
 /* ------------------------------------------------------------------ */
 exports.addListItem = async (req, res) => {
   try {
@@ -26,7 +26,7 @@ exports.addListItem = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* 📤 CSV upload                                                      */
+/* CSV upload                                                      */
 /* ------------------------------------------------------------------ */
 exports.uploadCsv = async (req, res) => {
   try {
@@ -39,7 +39,7 @@ exports.uploadCsv = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* ✏️ Update single item                                             */
+/* Update single item                                             */
 /* ------------------------------------------------------------------ */
 exports.updateListItem = async (req, res) => {
   try {
@@ -52,7 +52,7 @@ exports.updateListItem = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* 📄 Get item detail (POST /detail)                                  */
+/* Get item detail (POST /detail)                                  */
 /* ------------------------------------------------------------------ */
 exports.getListItemDetail = async (req, res) => {
   try {
@@ -66,7 +66,7 @@ exports.getListItemDetail = async (req, res) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* 🗑️ Delete item                                                    */
+/* Delete item                                                    */
 /* ------------------------------------------------------------------ */
 exports.deleteListItem = async (req, res) => {
   try {

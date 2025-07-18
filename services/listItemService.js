@@ -4,7 +4,7 @@ const fs  = require('fs');
 const csv = require('csv-parser');
 
 /* ------------------------------------------------------------------ */
-/* 🔍 Filter list‑items  → returns { rows, total }                    */
+/* Filter list‑items  → returns { rows, total }                    */
 /* ------------------------------------------------------------------ */
 exports.filterListItems = ({ page = 1, limit = 10, search = '', listId }) => {
   page  = Number(page);
@@ -45,7 +45,7 @@ exports.filterListItems = ({ page = 1, limit = 10, search = '', listId }) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* ➕ Add single list‑item                                             */
+/* Add single list‑item                                             */
 /* ------------------------------------------------------------------ */
 exports.addListItem = ({ listId, email, name, variables }) =>
   new Promise((resolve, reject) => {
@@ -57,7 +57,7 @@ exports.addListItem = ({ listId, email, name, variables }) =>
   });
 
 /* ------------------------------------------------------------------ */
-/* ✏️ Update list‑item                                                */
+/* Update list‑item                                                */
 /* ------------------------------------------------------------------ */
 exports.updateListItem = (id, { listId, email, name, variables }) => {
   const fields = [];
@@ -81,7 +81,7 @@ exports.updateListItem = (id, { listId, email, name, variables }) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* 📄 Get detail                                                      */
+/* Get detail                                                      */
 /* ------------------------------------------------------------------ */
 exports.getListItemDetail = (id) =>
   new Promise((resolve, reject) => {
@@ -91,7 +91,7 @@ exports.getListItemDetail = (id) =>
   });
 
 /* ------------------------------------------------------------------ */
-/* 📤 CSV upload  – respects defaultListId                            */
+/* CSV upload  – respects defaultListId                            */
 /* ------------------------------------------------------------------ */
 exports.uploadCsv = (file, defaultListId = null) =>
   new Promise((resolve, reject) => {
@@ -126,7 +126,7 @@ exports.uploadCsv = (file, defaultListId = null) =>
   });
 
 /* ------------------------------------------------------------------ */
-/* 🗑️ Delete list‑item                                               */
+/* Delete list‑item                                               */
 /* ------------------------------------------------------------------ */
 exports.deleteListItem = (id) =>
   new Promise((resolve, reject) => {
