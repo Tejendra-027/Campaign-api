@@ -12,8 +12,9 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const listRoutes = require('./routes/list');
 const listItemRoutes = require('./routes/listItem');
+const templateRoutes = require('./routes/template'); // ✅
 
-// Health check route
+/* Health check route */
 app.get('/', (req, res) => {
   res.send('API is running!');
 });
@@ -27,7 +28,10 @@ app.use('/dashboard/lists', listRoutes);
 app.use('/list', listRoutes); // Enables /list endpoints
 
 // List item routes
-app.use('/list/item', listItemRoutes); //  Handles /list/item/:id, etc.
+app.use('/list/item', listItemRoutes); // Handles /list/item/:id, etc.
+
+/* ✅ Template management routes - use plural '/templates' */
+app.use('/templates', templateRoutes); // <--- CHANGED from '/template' to '/templates'
 
 // Start server
 const PORT = process.env.PORT || 3000;

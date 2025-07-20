@@ -9,21 +9,18 @@ const authMiddleware = (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
 
-    if (!token) {
-        return res.status(401).json({ message: 'Token not found' });
-    }
-
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Attach user info (like id, email, roleId) to request
+        // Attach decoded user info to request object
         req.user = decoded;
 
-        // Optional: log decoded user for debugging
+        // Optional: Logging
         // console.log('Authenticated user:', decoded);
 
         next();
     } catch (err) {
+        console.error('JWT verification failed:', err.message);
         return res.status(403).json({ message: 'Invalid or expired token' });
     }
 };
