@@ -79,3 +79,36 @@ exports.filterTemplates = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+// Enable or disable a template
+exports.updateTemplateStatus = async (req, res) => {
+    try {
+        const templateId = req.params.id;
+        let { isActive } = req.body;
+
+        // Convert string to boolean if needed
+        if (typeof isActive === 'string') {
+            if (isActive.toLowerCase() === 'true') {
+                isActive = true;
+            } else if (isActive.toLowerCase() === 'false') {
+                isActive = false;
+            } else {
+                return res.status(400).json({ message: 'isActive must be true or false' });
+            }
+        }
+
+        if (typeof isActive !== 'boolean') {
+            return res.status(400).json({ message: 'isActive must be true or false' });
+        }
+
+        const result = await templateService.updateTemplateStatus(templateId, isActive);
+
+        res.json({
+            message: `Template ${isActive ? 'enabled' : 'disabled'} successfully`,
+            data: result
+        });
+    } catch (error) {
+        console.error('Update Template Status Error:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};

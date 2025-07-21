@@ -20,4 +20,7 @@ router.delete('/:id', authMiddleware, templateController.deleteTemplate);
 // Filter/paginate/search templates → POST /templates/filter
 router.post('/filter', authMiddleware, templateController.filterTemplates);
 
+// Update template status → PUT /templates/:id/status
+router.put('/:id/status', authMiddleware, templateController.updateTemplateStatus);
+
 module.exports = router;

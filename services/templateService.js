@@ -6,7 +6,8 @@ exports.addTemplate = ({ name, description, content, createdBy }) => {
         const sql = 'INSERT INTO templates (name, description, content, createdBy) VALUES (?, ?, ?, ?)';
         db.query(sql, [name, description, content, createdBy], (err, result) => {
             if (err) return reject(err);
-            // Fetch the full row after insert
+
+            // Fetch inserted row
             db.query('SELECT * FROM templates WHERE id = ?', [result.insertId], (err2, rows) => {
                 if (err2) return reject(err2);
                 resolve(rows[0]);
@@ -21,8 +22,8 @@ exports.updateTemplate = (id, { name, description, content }) => {
         const sql = 'UPDATE templates SET name = ?, description = ?, content = ? WHERE id = ?';
         db.query(sql, [name, description, content, id], (err, result) => {
             if (err) return reject(err);
-            if (result.affectedRows === 0) return resolve(null); // Not found
-            // Fetch the updated row
+            if (result.affectedRows === 0) return resolve(null);
+
             db.query('SELECT * FROM templates WHERE id = ?', [id], (err2, rows) => {
                 if (err2) return reject(err2);
                 resolve(rows[0]);
@@ -31,7 +32,7 @@ exports.updateTemplate = (id, { name, description, content }) => {
     });
 };
 
-// Get by ID
+// Get template by ID
 exports.getTemplateById = (id) => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM templates WHERE id = ?';
@@ -42,22 +43,22 @@ exports.getTemplateById = (id) => {
     });
 };
 
-// Delete
+// Delete template
 exports.deleteTemplate = (id) => {
     return new Promise((resolve, reject) => {
         const sql = 'DELETE FROM templates WHERE id = ?';
         db.query(sql, [id], (err, result) => {
             if (err) return reject(err);
-            if (result.affectedRows === 0) return resolve(false); // Not found
+            if (result.affectedRows === 0) return resolve(false);
             resolve(true);
         });
     });
 };
 
-// Filter (pagination + search)
+// Filter templates (with pagination and search)
 exports.filterTemplates = ({ page, limit, search }) => {
     return new Promise((resolve, reject) => {
-        const offset = (page - 1) * limit;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
         const searchTerm = `%${search}%`;
 
         const countSql = 'SELECT COUNT(*) AS total FROM templates WHERE name LIKE ?';
@@ -68,15 +69,31 @@ exports.filterTemplates = ({ page, limit, search }) => {
 
             const total = countResult[0].total;
 
-            db.query(dataSql, [searchTerm, parseInt(limit), offset], (err, dataResult) => {
-                if (err) return reject(err);
+            db.query(dataSql, [searchTerm, parseInt(limit), offset], (err2, rows) => {
+                if (err2) return reject(err2);
 
                 resolve({
                     total,
                     page: parseInt(page),
                     limit: parseInt(limit),
-                    data: dataResult
+                    data: rows
                 });
+            });
+        });
+    });
+};
+
+// Update template status (enable/disable)
+exports.updateTemplateStatus = (id, isActive) => {
+    return new Promise((resolve, reject) => {
+        const sql = 'UPDATE templates SET isActive = ? WHERE id = ?';
+        db.query(sql, [isActive, id], (err, result) => {
+            if (err) return reject(err);
+            if (result.affectedRows === 0) return resolve(null);
+
+            db.query('SELECT * FROM templates WHERE id = ?', [id], (err2, rows) => {
+                if (err2) return reject(err2);
+                resolve(rows[0]);
             });
         });
     });
