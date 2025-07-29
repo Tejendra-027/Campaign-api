@@ -26,18 +26,19 @@ const campaignRoutes = require('./routes/campaign');
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 
-// Lists
-app.use('/dashboard/lists', listRoutes);
-app.use('/list', listRoutes);
+// ✅ Lists
+app.use('/list', listRoutes);               // legacy
+app.use('/api/list', listRoutes);          // preferred
 
-// List Items
+// ✅ Templates
+app.use('/templates', templateRoutes);           // legacy
+app.use('/api/templates', templateRoutes);       // preferred
+
+// ✅ List Items
 app.use('/list/item', listItemRoutes);
 
-// Templates
-app.use('/templates', templateRoutes);
-
-// ✅ ✅ Campaigns updated to match frontend
-app.use('/api/campaign', campaignRoutes);  // changed from /campaign to /api/campaign
+// ✅ Campaigns
+app.use('/api/campaign', campaignRoutes);  // used by frontend: /api/campaign
 
 // ✅ Start server
 const PORT = process.env.PORT || 3000;
