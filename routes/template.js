@@ -23,4 +23,8 @@ router.post('/filter', authMiddleware, templateController.filterTemplates);
 // Update template status → PUT /templates/:id/status
 router.put('/:id/status', authMiddleware, templateController.updateTemplateStatus);
 
+// Get all templates (id + name only) – for campaign dropdown
+router.get('/all', authMiddleware, templateController.getAllTemplatesSimple);
+
+
 module.exports = router;

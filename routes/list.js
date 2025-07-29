@@ -22,4 +22,7 @@ router.put('/:id', authMiddleware, listController.updateList);
 // Delete a list (manual cascade in controller)
 router.delete('/:id', authMiddleware, listController.deleteList);
 
+router.get('/all', authMiddleware, listController.getAllListsSimple);
+
+
 module.exports = router;

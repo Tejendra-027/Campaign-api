@@ -86,15 +86,8 @@ exports.updateTemplateStatus = async (req, res) => {
         const templateId = req.params.id;
         let { isActive } = req.body;
 
-        // Convert string to boolean if needed
         if (typeof isActive === 'string') {
-            if (isActive.toLowerCase() === 'true') {
-                isActive = true;
-            } else if (isActive.toLowerCase() === 'false') {
-                isActive = false;
-            } else {
-                return res.status(400).json({ message: 'isActive must be true or false' });
-            }
+            isActive = isActive.toLowerCase() === 'true';
         }
 
         if (typeof isActive !== 'boolean') {
@@ -110,5 +103,16 @@ exports.updateTemplateStatus = async (req, res) => {
     } catch (error) {
         console.error('Update Template Status Error:', error);
         res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+// ✅ Get all templates (id + name only) — for campaign dropdown
+exports.getAllTemplatesSimple = async (req, res) => {
+    try {
+        const templates = await templateService.getAllTemplatesSimple();
+        return res.json(templates);
+    } catch (error) {
+        console.error('Get All Templates Simple Error:', error);
+        return res.status(500).json({ message: 'Failed to fetch templates' });
     }
 };

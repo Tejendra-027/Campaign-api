@@ -98,3 +98,14 @@ exports.updateTemplateStatus = (id, isActive) => {
         });
     });
 };
+
+// Get all templates (id + name only)
+exports.getAllTemplatesSimple = () => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT id, name FROM templates ORDER BY id DESC';
+        db.query(sql, (err, results) => {
+            if (err) return reject(err);
+            resolve(results);
+        });
+    });
+};

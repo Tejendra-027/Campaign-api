@@ -108,3 +108,11 @@ exports.deleteList = async id => {
     throw e;
   }
 };
+
+// ✅ Get all list names (for dropdown in Campaign form)
+exports.getAllListsSimple = () =>
+  new Promise((resolve, reject) => {
+    db.query('SELECT id, name FROM list ORDER BY id DESC', (err, res) =>
+      err ? reject(err) : resolve(res)
+    );
+  });
