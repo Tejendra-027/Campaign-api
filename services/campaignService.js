@@ -199,3 +199,24 @@ exports.copyCampaign = (id) => {
     });
   });
 };
+
+// ✅ Get campaign with template and audience list details
+exports.getCampaignDetails = (id) => {
+  return new Promise((resolve, reject) => {
+    const sql = `
+      SELECT 
+        c.*, 
+        t.name AS templateName, 
+        l.name AS audienceListName 
+      FROM campaigns c
+      LEFT JOIN templates t ON c.templateId = t.id
+      LEFT JOIN lists l ON c.audienceListId = l.id
+      WHERE c.id = ? AND c.isDeleted = FALSE
+    `;
+    db.query(sql, [id], (err, rows) => {
+      if (err) return reject(err);
+      if (!rows.length) return resolve(null);
+      resolve(rows[0]);
+    });
+  });
+};
